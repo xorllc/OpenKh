@@ -152,6 +152,9 @@ namespace OpenKh.Command.ImgTool
             [Option(CommandOptionType.NoValue, Description = "Use embedded nQuant.Core color quantizer. This is default selection.", ShortName = "n", LongName = "nquant")]
             public bool nQuant { get; set; }
 
+            [Option(CommandOptionType.NoValue, Description = "Enable swizzle.", ShortName = "s", LongName = "swizzle")]
+            public bool Swizzle { get; set; }
+
             protected int OnExecute(CommandLineApplication app)
             {
                 var inputFile = PngFile;
@@ -162,7 +165,7 @@ namespace OpenKh.Command.ImgTool
                 // Alpha enabled png → always 32 bpp
                 using (var bitmap = new Bitmap(inputFile))
                 {
-                    var imgd = ImgdBitmapUtil.ToImgd(bitmap, BitsPerPixel, QuantizerFactory.MakeFrom(this));
+                    var imgd = ImgdBitmapUtil.ToImgd(bitmap, BitsPerPixel, QuantizerFactory.MakeFrom(this), Swizzle);
 
                     var buffer = new MemoryStream();
                     imgd.Write(buffer);
@@ -195,6 +198,9 @@ namespace OpenKh.Command.ImgTool
             [Option(CommandOptionType.NoValue, Description = "Try to append to imz", ShortName = "a", LongName = "append")]
             public bool Append { get; set; }
 
+            [Option(CommandOptionType.NoValue, Description = "Enable swizzle for png input.", ShortName = "s", LongName = "swizzle")]
+            public bool Swizzle { get; set; }
+
             protected int OnExecute(CommandLineApplication app)
             {
                 OutputImz = OutputImz ?? Path.GetFullPath(Path.GetFileName(Path.ChangeExtension(InputFile.First(), ".imz")));
@@ -211,7 +217,7 @@ namespace OpenKh.Command.ImgTool
                     prependImgdList
                         .Concat(
                             InputFile
-                                .SelectMany(imdFile => ImgdBitmapUtil.FromFileToImgdList(imdFile, BitsPerPixel, QuantizerFactory.MakeFrom(this)))
+                                .SelectMany(imdFile => ImgdBitmapUtil.FromFileToImgdList(imdFile, BitsPerPixel, QuantizerFactory.MakeFrom(this), Swizzle))
                         )
                         .ToArray()
                 );
